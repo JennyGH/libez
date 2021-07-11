@@ -2,8 +2,9 @@
 #define _NET_PCH_H_
 #include <stdarg.h>
 #include <memory>
-#include <private/platform_compatibility.h>
-#if defined(_MSC_VER) && _MSC_VER > 0
+#include <base/platform_defs.h>
+#include <base/platform_compatibility.h>
+#if __WINDOWS__
 #    include <Windows.h>
 #    include <WinSock2.h>
 #else
@@ -15,6 +16,6 @@
 #    include <sys/epoll.h>
 #    include <sys/ioctl.h>
 #    include <netinet/in.h>
-#endif // defined(_MSC_VER) && _MSC_VER > 0
+#endif // __WINDOWS__
 #include "private/macros.h"
 #endif // !_NET_PCH_H_

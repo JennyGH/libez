@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <base/platform_defs.h>
 
-#ifdef _MSC_VER
+#if __WINDOWS__
 #    include <process.h>
 #    include <Windows.h>
 #    ifndef sleep
@@ -176,6 +177,5 @@ pid_t __gettid();
 #        define closesocket(socket) close(socket)
 #    endif // !closesocket
 
-#endif // _MSC_VER
-
+#endif // __WINDOWS__
 #endif // !_BASE_PLATFORM_COMPATIBILITY_H_

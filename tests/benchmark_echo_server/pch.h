@@ -1,10 +1,11 @@
 #ifndef _PCH_H_
 #define _PCH_H_
-#include <private/platform_compatibility.h>
+#include <base/platform_defs.h>
+#include <base/platform_compatibility.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#if defined(_MSC_VER) && _MSC_VER > 0
+#if __WINDOWS__
 #    include <Windows.h>
 #    include <WinSock2.h>
 using socket_t = SOCKET;
@@ -17,8 +18,8 @@ using socket_t = SOCKET;
 #    include <sys/ioctl.h>
 #    include <netinet/in.h>
 using socket_t = int;
-#endif // defined(_MSC_VER) && _MSC_VER > 0
+#endif // __WINDOWS__
 #include <benchmark/benchmark.h>
-#include <os.h>
-#include <argument_parser.h>
+#include <base/os.h>
+#include <base/argument_parser.h>
 #endif // !_PCH_H_

@@ -3,9 +3,9 @@
 #include "net_exception.h"
 #include "private/socket_api.h"
 #include "private/scope_socket.h"
-#include <os.h>
-#include <format.h>
-#include <codec.h>
+#include <base/os.h>
+#include <base/format.h>
+#include <base/codec.h>
 
 #if DEBUG
 #    define CONSOLE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)

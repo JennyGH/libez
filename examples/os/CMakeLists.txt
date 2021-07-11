@@ -1,4 +1,4 @@
-PROJECT(echo_server)
+PROJECT(os)
 
 # 递归地查找头文件，并存放到 INCLUDE_FILES 变量中
 FILE(GLOB_RECURSE INCLUDE_FILES
@@ -31,7 +31,6 @@ INCLUDE_DIRECTORIES(
 # 当前子工程要链接的库名称
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}
-    eznet
     ezbase
 )
 

@@ -25,7 +25,7 @@ ADD_EXECUTABLE(
 
 # 当前子工程要包含的头文件路径
 INCLUDE_DIRECTORIES(
-    ${CMAKE_SOURCE_DIR}/src/base
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 # 当前子工程要链接的库名称

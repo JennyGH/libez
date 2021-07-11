@@ -11,12 +11,12 @@ static global_initializer g_global_intializer(_initialize_socket_environment, nu
 
 static void _initialize_socket_environment()
 {
-#if defined(_MSC_VER) && _MSC_VER > 0
+#if __WINDOWS__
     WSADATA wsaData;
     WORD    wVersionRequested = MAKEWORD(2, 2);
     INT     nError            = ::WSAStartup(wVersionRequested, &wsaData);
     CONSOLE("WSAStartup return: %d", nError);
-#endif // defined(_MSC_VER) && _MSC_VER > 0
+#endif // __WINDOWS__
 }
 
 static int _send_all(const scope_socket& skt, const void* data, const size_t& length, int flags)

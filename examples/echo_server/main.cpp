@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <inet/server.h>
-#include <inet/connection_builder.h>
-#include <argument_parser.h>
+#include <net/inet/server.h>
+#include <net/inet/connection_builder.h>
+#include <base/argument_parser.h>
 
 #define CONSOLE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 

@@ -4,9 +4,9 @@
 #include <mutex>
 #include <memory>
 #include <cstdint>
-#include <basic_event_loop.h>
-#include <basic_connection.h>
-#include <basic_connection_builder.h>
+#include <net/basic_event_loop.h>
+#include <net/basic_connection.h>
+#include <net/basic_connection_builder.h>
 namespace ez
 {
     namespace net

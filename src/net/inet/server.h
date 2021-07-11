@@ -1,7 +1,7 @@
 #ifndef _NET_TCP_SERVER_H_
 #define _NET_TCP_SERVER_H_
-#include "basic_server.h"
-#include "inet/endpoint.h"
+#include <net/basic_server.h>
+#include <net/inet/endpoint.h>
 namespace ez
 {
     namespace net

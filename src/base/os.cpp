@@ -1,26 +1,78 @@
 #include "pch.h"
 #include "os.h"
-#if _MSC_VER
-#    include <Windows.h>
-#else
-#    include <errno.h>
-#    include <stdlib.h>
-#    include <string.h>
-#endif // _MSC_VER
+#include "platform_defs.h"
+#ifdef __cplusplus
+#    if __WINDOWS__
+#        include <Windows.h>
+#    else
+#        include <errno.h>
+#        include <stdlib.h>
+#        include <string.h>
+#    endif // __WINDOWS__
+
+ez::base::os::endian_t ez::base::os::get_current_endian()
+{
+    union
+    {
+        char           c;
+        unsigned short s;
+    } u;
+    u.s = 0x1234;
+    if (u.s == 0x12)
+    {
+        return ez::base::os::big_endian;
+    }
+    return ez::base::os::little_endian;
+}
+
+void ez::base::os::serialize(const void* src, const size_t& src_size, const endian_t& to_endian, void* dst, const size_t& dst_size)
+{
+    if (nullptr == src || src_size == 0)
+    {
+        return;
+    }
+    if (nullptr == dst || dst_size == 0)
+    {
+        return;
+    }
+    if (dst_size < src_size)
+    {
+        return;
+    }
+
+    ez::base::os::endian_t from_endian = get_current_endian();
+    if (from_endian == to_endian)
+    {
+        memcpy_s(dst, dst_size, src, src_size);
+        return;
+    }
+
+    const unsigned char* src_bytes = (const unsigned char*)(src);
+    unsigned char*       dst_bytes = (unsigned char*)(dst);
+    for (size_t i = 0; i < src_size; i++)
+    {
+        dst_bytes[i] = src_bytes[src_size - i - 1];
+    }
+}
+
+void ez::base::os::deserialize(const void* src, const size_t& src_size, const endian_t& to_endian, void* dst, const size_t& dst_size)
+{
+    serialize(src, src_size, to_endian, dst, dst_size);
+}
 
 int ez::base::os::get_last_error()
 {
-#if _MSC_VER
+#    if __WINDOWS__
     return ::GetLastError();
-#else
+#    else
     return errno;
-#endif // _MSC_VER
+#    endif // __WINDOWS__
 }
 
 std::string ez::base::os::get_error_message(int errcode)
 {
     std::string res;
-#if _MSC_VER
+#    if __WINDOWS__
     LPVOID lpMsgBuf = NULL;
     DWORD  dwLength = ::FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -42,17 +94,17 @@ std::string ez::base::os::get_error_message(int errcode)
             length--;
         }
     }
-#else
-    char buffer[1024] = {0};
-#    if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE
-    int ret = ::strerror_r(errcode, buffer, sizeof(buffer));
-    res.assign(buffer);
 #    else
+    char buffer[1024] = {0};
+#        if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE
+    ::strerror_r(errcode, buffer, sizeof(buffer));
+    res.assign(buffer);
+#        else
     char* str = ::strerror_r(errcode, buffer, sizeof(buffer));
     res.assign(str);
-#    endif // (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !
-           // _GNU_SOURCE
-#endif // _MSC_VER
+#        endif // (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !
+               // _GNU_SOURCE
+#    endif     // __WINDOWS__
     return res;
 }
 
@@ -60,3 +112,4 @@ std::string ez::base::os::get_last_error_message()
 {
     return ez::base::os::get_error_message(ez::base::os::get_last_error());
 }
+#endif // __cplusplus

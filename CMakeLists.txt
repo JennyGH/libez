@@ -168,7 +168,10 @@ IF(UNIX)
     ADD_SUBDIRECTORY(src/net)
 ENDIF(UNIX)
 # 添加示例代码
-SET(EXAMPLES codec)
+SET(EXAMPLES codec
+             os
+             file_system
+)
 IF(UNIX)
     SET(EXAMPLES ${EXAMPLES} echo_server)
 ENDIF(UNIX)

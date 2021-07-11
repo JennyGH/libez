@@ -27,6 +27,7 @@ ADD_LIBRARY(
 # 当前子工程要包含的头文件路径
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 # 当前子工程要链接的库名称
