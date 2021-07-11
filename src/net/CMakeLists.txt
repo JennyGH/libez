@@ -1,0 +1,49 @@
+PROJECT(eznet)
+
+# 递归地查找头文件，并存放到 INCLUDE_FILES 变量中
+FILE(GLOB_RECURSE INCLUDE_FILES
+    ${PROJECT_SOURCE_DIR}/*.h
+    ${PROJECT_SOURCE_DIR}/*.hpp
+)
+
+# 递归地查找 .c/.cpp 文件，并存放到 SOURCE_FILES 变量中
+FILE(GLOB_RECURSE SOURCE_FILES 
+    ${PROJECT_SOURCE_DIR}/*.c
+    ${PROJECT_SOURCE_DIR}/*.cpp
+)
+    
+# 将文件分组
+GROUP_FILES(${INCLUDE_FILES} "Header Files")
+GROUP_FILES(${SOURCE_FILES}  "Source Files")
+
+# 指定当前子工程是编译为静态库文件
+ADD_LIBRARY(
+    ${PROJECT_NAME}
+    STATIC
+    ${INCLUDE_FILES}
+    ${SOURCE_FILES}
+)
+
+# 当前子工程要包含的头文件路径
+INCLUDE_DIRECTORIES(
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src/base
+)
+
+# 当前子工程要链接的库名称
+SET(EX_LINK_LIBRARIES )
+IF(MSVC)
+    SET(EX_LINK_LIBRARIES ${EX_LINK_LIBRARIES} ws2_32)
+ENDIF() # ENDIF MSVC
+TARGET_LINK_LIBRARIES(
+    ${PROJECT_NAME}
+    ezbase
+    ${EX_LINK_LIBRARIES}
+)
+
+# 配置预编译头:
+TARGET_PRECOMPILE_HEADERS(
+  ${PROJECT_NAME}
+  PRIVATE
+  "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/pch.h>"
+)

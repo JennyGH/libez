@@ -1,0 +1,39 @@
+[B|b]uild*/
+[B|b]uilt*/
+[D|d]ev*/
+[O|o]bj/
+[L|l]og/
+
+# SVN
+.svn/
+
+# Visual Studio
+.vs/
+
+# Visual Studio Code
+.vscode/
+
+# MSVC
+*.VC.*
+*.vcxproj.*
+Debug
+Release
+
+# CMake
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+
+# Compiled Object files
+*.o
+*.lo
+*.slo
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Other
+*.log
+*.tmp
