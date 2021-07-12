@@ -2,7 +2,7 @@
 #include "scope_socket.h"
 #include "global_initializer.h"
 
-#define THREAD_COUNT      4
+#define THREAD_COUNT      8
 #define CONSOLE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 #define ERRMSG            ez::base::os::get_last_error_message().c_str()
 
@@ -28,7 +28,7 @@ static int _send_all(const scope_socket& skt, const void* data, const size_t& le
         rv = ::send(skt, (const char*)data + send_bytes, length - send_bytes, 0);
         if (rv <= 0)
         {
-            CONSOLE("Unable to send %d bytes to remote server, because: %s", (length - send_bytes), ERRMSG);
+            CONSOLE("Unable to send %ld bytes to remote server, because: %s", (length - send_bytes), ERRMSG);
             return rv;
         }
         send_bytes += rv;
@@ -79,7 +79,7 @@ static size_t _test_tcp_transfer(const sockaddr_in& addr, const void* data, cons
 
 static void test_tcp_transfer(benchmark::State& state)
 {
-    static const std::string    ip          = "127.0.0.1";
+    static const std::string    ip          = "192.168.201.184";
     static const unsigned short port        = 8080;
     static const std::string    buffer      = "ping"; //_generate_send_buffer(32 * 1024);
     int64_t                     output_size = 0;

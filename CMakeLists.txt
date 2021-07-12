@@ -147,8 +147,8 @@ ENDIF() # ENDIF X86_64
 IF(MSVC)
     ADD_DEFINITIONS(
         -D_MSC_VER=${MSVC_VERSION}
-        -DWINVER=0x0501       # Windows XP
-        -D_WIN32_WINNT=0x0501 # Windows XP
+        -DWINVER=0x0600
+        -D_WIN32_WINNT=0x0600
     )
 ENDIF() # ENDIF MSVC
 
