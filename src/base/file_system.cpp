@@ -6,7 +6,7 @@
 
 using namespace ez::base::file_system;
 
-int _walk(const path_t& path, int depth, paths_t& paths)
+static int _walk(const path_t& path, int depth, paths_t& paths)
 {
     path_t tmp_path = path;
     char   last_chr = tmp_path.back();
@@ -77,17 +77,26 @@ bool ez::base::file_system::exists(const path_t& path)
 
 bool ez::base::file_system::is_dir(const path_t& path)
 {
-    // ...
+    struct stat file_state;
+    memset(&file_state, 0, sizeof(file_state));
+    stat(path.c_str(), &file_state);
+    return S_ISDIR(file_state.st_mode);
 }
 
 bool ez::base::file_system::is_file(const path_t& path)
 {
-    // ...
+    struct stat file_state;
+    memset(&file_state, 0, sizeof(file_state));
+    stat(path.c_str(), &file_state);
+    return S_ISREG(file_state.st_mode);
 }
 
 bool ez::base::file_system::is_link(const path_t& path)
 {
-    // ...
+    struct stat file_state;
+    memset(&file_state, 0, sizeof(file_state));
+    stat(path.c_str(), &file_state);
+    return S_ISLNK(file_state.st_mode);
 }
 
 size_t ez::base::file_system::get_size(const path_t& path)
@@ -115,17 +124,35 @@ size_t ez::base::file_system::load(const path_t& path, void* dst, const size_t& 
         return 0;
     }
 
-    FILE* file_ptr = fopen(path.c_str(), "rb");
+    FILE* file_ptr = ::fopen(path.c_str(), "rb");
     if (nullptr == file_ptr)
     {
         return 0;
     }
     SCOPE_PTR_OF(file_ptr, ::fclose);
+
+    size_t read_size = ::fread(dst, 1, file_size, file_ptr);
+
+    return read_size;
 }
 
 size_t ez::base::file_system::save(const path_t& path, const void* src, const size_t& src_size)
 {
-    // ...
+    if (is_dir(path))
+    {
+        return 0;
+    }
+
+    FILE* file_ptr = ::fopen(path.c_str(), "wb");
+    if (nullptr == file_ptr)
+    {
+        return 0;
+    }
+    SCOPE_PTR_OF(file_ptr, ::fclose);
+
+    size_t read_size = ::fwrite(src, 1, src_size, file_ptr);
+
+    return read_size;
 }
 
 paths_t ez::base::file_system::walk(const path_t& path, int depth)
