@@ -11,7 +11,7 @@
 #    ifdef _MSC_VER
 #        define __cpp11 (_MSC_VER > 1600 || __cplusplus > 199711L)
 #    else
-#        define __cpp11                                                                                                \
+#        define __cpp11                                                                            \
             (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__ > 40805) || (__cplusplus > 199711L)
 #    endif // _MSC_VER
 #endif     // !__cpp11
@@ -148,6 +148,8 @@ namespace ez
         {
         public:
             argument_parser(int argc, char** argv);
+
+            argument_parser(const char* cmd_line);
 
             ~argument_parser();
 
