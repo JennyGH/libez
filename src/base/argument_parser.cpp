@@ -1,16 +1,22 @@
 #include "pch.h"
 #include "argument_parser.h"
 
+static inline std::string _trim(const std::string& str)
+{
+    std::size_t pos = str.find_first_of(' ');
+    return str.substr(0, pos);
+}
+
 static inline void _parse_arg(const std::string& arg, ez::base::_argument_map& args)
 {
     std::size_t pos = arg.find_first_of('=');
     if (std::string::npos == pos)
     {
-        args[arg.substr(1)] = "true";
+        args[_trim(arg.substr(1))] = "true";
     }
     else
     {
-        args[arg.substr(1, pos - 1)] = arg.substr(pos + 1);
+        args[_trim(arg.substr(1, pos - 1))] = arg.substr(pos + 1);
     }
 }
 
