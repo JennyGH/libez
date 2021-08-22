@@ -12,23 +12,26 @@ namespace ez
         {
             namespace base64
             {
-                std::string encode(const void* data, const size_t& length);
+
+                using buffer_t = std::basic_string<unsigned char>;
+
+                std::string encode(const void* data, const size_t& length, bool no_padding = true, bool url_encode = true);
 
                 template <typename T, size_t length>
-                std::string encode(const T (&data)[length])
+                std::string encode(const T (&data)[length], bool no_padding = true, bool url_encode = true)
                 {
-                    return ez::base::codec::base64::encode(data, length);
+                    return ez::base::codec::base64::encode(data, length, no_padding, url_encode);
                 }
 
                 template <typename T>
-                std::string encode(const std::basic_string<T>& data)
+                std::string encode(const std::basic_string<T>& data, bool no_padding = true, bool url_encode = true)
                 {
-                    return ez::base::codec::base64::encode(data.data(), data.length());
+                    return ez::base::codec::base64::encode(data.data(), data.length(), no_padding, url_encode);
                 }
 
-                std::string decode(const std::string& base64);
+                buffer_t decode(const std::string& base64);
 
-                std::string decode(const char* base64, const size_t& length);
+                buffer_t decode(const char* base64, const size_t& length);
 
             } // namespace base64
 

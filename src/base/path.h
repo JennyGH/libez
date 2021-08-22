@@ -18,11 +18,13 @@ namespace ez
             std::string dirname() const;
             std::string suffix() const;
             path        parent() const;
-            path&       join(const std::string& str);
-            path        join(const std::string& str) const;
-            path&       operator+=(const std::string& str);
-            path        operator+(const std::string& str) const;
-                        operator std::string() const;
+            path        join(const std::string& sub_path) const;
+            bool        operator==(const path& path) const;
+                        operator const std::string &() const;
+                        operator const char*() const;
+
+        private:
+            std::string _value;
         };
 
     } // namespace base

@@ -47,32 +47,12 @@ static inline char _get_base64_char(unsigned char char_code, bool is_url_safe)
     return c;
 }
 
-static void _print_bits(const void* src, const size_t& length)
-{
-    const unsigned char* bytes = static_cast<const unsigned char*>(src);
-    for (size_t i = 0; i < length; i++)
-    {
-        for (size_t j = 0; j < 8; j++)
-        {
-            printf("%d", 0x01 & (bytes[i] >> (7 - j)));
-        }
-        printf(" ");
-    }
-    printf("\n");
-}
-
-template <typename T, size_t length>
-static void _print_bits(const T (&src)[length])
-{
-    _print_bits(src, length);
-}
-
-static void _base64_encode(const unsigned char* src, const size_t& length, std::string& encoded)
+static void _base64_encode(const unsigned char* src, const size_t& length, std::string& encoded, bool no_padding, bool url_encode)
 {
     unsigned char char_codes[4] = {0x00};
 
-    bool is_no_padding = false; // (mode & ez::base::codec::base64::no_padding) == ez::base::codec::base64::no_padding;
-    bool is_url_safe   = false; // (mode & ez::base::codec::base64::url_safe) == ez::base::codec::base64::url_safe;
+    bool is_no_padding = no_padding; // (mode & ez::base::codec::base64::no_padding) == ez::base::codec::base64::no_padding;
+    bool is_url_safe   = url_encode; // (mode & ez::base::codec::base64::url_safe) == ez::base::codec::base64::url_safe;
 
     if (length >= 3)
     {
@@ -113,10 +93,9 @@ static void _base64_encode(const unsigned char* src, const size_t& length, std::
     {
         // Bad source data.
     }
-    _print_bits(char_codes, length + 1);
 }
 
-static void _base64_decode(const char* src, const size_t& length, std::string& decoded)
+static void _base64_decode(const char* src, const size_t& length, buffer_t& decoded)
 {
     unsigned char char_code_1 = 0x00;
     unsigned char char_code_2 = 0x00;
@@ -167,27 +146,26 @@ static void _base64_decode(const char* src, const size_t& length, std::string& d
     }
 }
 
-std::string ez::base::codec::base64::encode(const void* data, const size_t& length)
+std::string ez::base::codec::base64::encode(const void* data, const size_t& length, bool no_padding, bool url_encode)
 {
     const unsigned char* bytes = static_cast<const unsigned char*>(data);
 
     std::string encoded;
     for (size_t i = 0; i < length; i += 3)
     {
-        _base64_encode(bytes + i, length - i, encoded);
+        _base64_encode(bytes + i, length - i, encoded, no_padding, url_encode);
     }
     return encoded;
 }
 
-std::string ez::base::codec::base64::decode(const std::string& base64)
+buffer_t ez::base::codec::base64::decode(const std::string& base64)
 {
     return ez::base::codec::base64::decode(base64.c_str(), base64.length());
 }
 
-std::string ez::base::codec::base64::decode(const char* base64, const size_t& length)
+buffer_t ez::base::codec::base64::decode(const char* base64, const size_t& length)
 {
-    _print_bits(base64, length);
-    std::string decoded;
+    buffer_t decoded;
     for (size_t i = 0; i < length; i += 4)
     {
         _base64_decode(base64 + i, length - i, decoded);

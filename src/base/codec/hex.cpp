@@ -31,14 +31,14 @@ std::string ez::base::codec::hex::encode(const void* data, const size_t& length,
     return encoded;
 }
 
-std::string ez::base::codec::hex::decode(const std::string& hex)
+ez::base::codec::hex::buffer_t ez::base::codec::hex::decode(const std::string& hex)
 {
     return decode(hex.c_str(), hex.length());
 }
 
-std::string ez::base::codec::hex::decode(const char* hex, const size_t& length)
+ez::base::codec::hex::buffer_t ez::base::codec::hex::decode(const char* hex, const size_t& length)
 {
-    std::string bytes;
+    buffer_t bytes;
     for (size_t i = 0; i < length;)
     {
         unsigned char h    = _hex_decode(hex[i++]);

@@ -1,42 +1,39 @@
 #ifndef _BASE_FILE_SYSTEM_H_
 #define _BASE_FILE_SYSTEM_H_
-#ifdef __cplusplus
-#    include <list>
-#    include <time.h>
-#    include <string>
+#include <list>
+#include <string>
+#include <fstream>
+
 namespace ez
 {
     namespace base
     {
         namespace file_system
         {
-            using path_t      = std::string;
-            using paths_t     = std::list<path_t>;
-            using file_info_t = struct
+            using path_t  = std::string;
+            using paths_t = std::list<path_t>;
+            using bytes_t = std::basic_string<unsigned char>;
+
+            enum walk_filter_t
             {
-                std::string    path;
-                size_t         size;
-                bool           exists;
-                char           type;
-                unsigned short access_rights;
-                time_t         create_time;
-                time_t         access_time;
-                time_t         modified_time;
+                file      = (1 << 0),
+                directory = (1 << 1),
+                all       = file | directory
             };
 
-            bool    exists(const path_t& path);
-            bool    is_dir(const path_t& path);
-            bool    is_file(const path_t& path);
-            bool    is_link(const path_t& path);
-            size_t  get_size(const path_t& path);
-            void    get_file_info(const path_t& path, file_info_t& output_info);
-            size_t  load(const path_t& path, void* dst, const size_t& dst_size);
-            size_t  save(const path_t& path, const void* src, const size_t& src_size);
-            paths_t walk(const path_t& path, int depth = 0);
+            bool    exists(const std::string& path);
+            bool    mkdir(const std::string& path);
+            bool    rmdir(const std::string& path);
+            paths_t walk(const path_t& path, walk_filter_t filter = walk_filter_t::file, int depth = 0);
+            bytes_t load(const path_t& path);
+            size_t  save(const path_t& path, const bytes_t& bytes);
+            size_t  save(const path_t& path, const void* data, const size_t& length);
+            size_t  copy(const path_t& from, const path_t& to);
+
         } // namespace file_system
 
     } // namespace base
 
 } // namespace ez
-#endif // __cplusplus
+
 #endif // !_BASE_FILE_SYSTEM_H_

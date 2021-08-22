@@ -28,9 +28,11 @@ std::string ez::base::format(const char* fmt, va_list args)
     {
         return "Unable to allocate memory to format the string.";
     }
-    std::shared_ptr<char> _scope_buffer_ptr(buffer, ::free);
 
-    int formated_size = vsnprintf(buffer, need_size, fmt, args);
+    int         formated_size = vsnprintf(buffer, need_size, fmt, args);
+    std::string formated(buffer, formated_size);
 
-    return std::string(buffer, formated_size);
+    ::free(buffer);
+
+    return formated;
 }
