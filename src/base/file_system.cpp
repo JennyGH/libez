@@ -13,6 +13,7 @@
 #    include <sys/types.h>
 #else
 #    include <io.h>
+#    include <direct.h>
 #    include <Windows.h>
 #endif // !_MSC_VER
 
@@ -41,16 +42,8 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
         {
             if (depth > 0 && S_ISDIR(file_state.st_mode))
             {
-                _walk(paths.back(), depth - 1, paths);
+                _walk(paths.back(), filter, depth - 1, paths);
             }
-        }
-        else
-        {
-            CONSOLE(
-                "[ERROR] `lstat` return: %d, because: %s(%d).",
-                rv,
-                ez::base::os::get_last_error_message().c_str(),
-                ez::base::os::get_last_error());
         }
     }
 #else
@@ -77,8 +70,8 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
             _walk(current_path, filter, depth - 1, paths);
         }
     } while (::FindNextFileA(handle, &data));
-#endif
     ::FindClose(handle);
+#endif
     return paths.size();
 }
 
@@ -89,21 +82,45 @@ bool ez::base::file_system::exists(const std::string& path)
 
 bool ez::base::file_system::mkdir(const std::string& path)
 {
-    const std::string native_path = ez::base::path(path);
 #ifdef _MSC_VER
-    return ::system(std::string("md ").append(native_path).c_str()) == 0;
+    const ez::base::path native_path = path;
+    const ez::base::path parent_path = native_path.parent();
+    if (!file_system::exists(parent_path))
+    {
+        file_system::mkdir(parent_path);
+    }
+    return 0 == ::mkdir(native_path);
 #else
-    return ::system(std::string("mkdir -p ").append(native_path).c_str()) == 0;
+    return 0 == ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif // _MSC_VER
 }
 
 bool ez::base::file_system::rmdir(const std::string& path)
 {
-    const std::string native_path = ez::base::path(path);
+    if (!file_system::exists(path))
+    {
+        return false;
+    }
 #ifdef _MSC_VER
-    return ::system(std::string("rd /s /q ").append(native_path).c_str()) == 0;
+    const auto files = file_system::walk(path, file_system::file);
+    for (const auto& file : files)
+    {
+        if (0 != ::rmdir(file.c_str()))
+        {
+            return false;
+        }
+    }
+    const auto dirs = file_system::walk(path, file_system::directory);
+    for (const auto& dir : dirs)
+    {
+        if (!file_system::rmdir(dir))
+        {
+            return false;
+        }
+    }
+    return 0 == ::rmdir(path.c_str());
 #else
-    return ::system(std::string("rm -rf ").append(native_path).c_str()) == 0;
+    return 0 == ::rmdir(path.c_str());
 #endif // _MSC_VER
 }
 
@@ -116,12 +133,34 @@ ez::base::file_system::paths_t ez::base::file_system::walk(const path_t& path, w
 
 ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path)
 {
-    std::basic_ifstream<bytes_t::value_type> file(path.c_str(), std::ios::in | std::ios::binary);
-    if (!file.is_open())
+    FILE* file = ::fopen(path.c_str(), "rb");
+    if (nullptr == file)
     {
         return bytes_t();
     }
-    bytes_t bytes((std::istreambuf_iterator<bytes_t::value_type>(file)), std::istreambuf_iterator<bytes_t::value_type>());
+
+    ::fseek(file, 0L, SEEK_END);
+    size_t file_size = ::ftell(file);
+    if (0 == file_size)
+    {
+        ::fclose(file);
+        return bytes_t();
+    }
+
+    unsigned char* data = (unsigned char*)::malloc(file_size);
+    if (nullptr == data)
+    {
+        ::fclose(file);
+        return bytes_t();
+    }
+
+    size_t read_size = ::fread(data, 1, file_size, file);
+
+    bytes_t bytes(data, read_size);
+
+    ::free(data);
+
+    ::fclose(file);
     return bytes;
 }
 
@@ -132,14 +171,14 @@ size_t ez::base::file_system::save(const path_t& path, const bytes_t& bytes)
 
 size_t ez::base::file_system::save(const ez::base::file_system::path_t& path, const void* src, const size_t& src_size)
 {
-    std::basic_ofstream<bytes_t::value_type> file(path.c_str(), std::ios::out | std::ios::binary);
-    if (!file.is_open())
+    FILE* file = ::fopen(path.c_str(), "wb");
+    if (nullptr == file)
     {
         return 0;
     }
-    file.write((const bytes_t::value_type*)src, src_size);
-    file.close();
-    return src_size;
+    size_t output_size = ::fwrite(src, 1, src_size, file);
+    ::fclose(file);
+    return output_size;
 }
 
 size_t ez::base::file_system::copy(const path_t& from, const path_t& to)
