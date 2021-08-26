@@ -17,6 +17,18 @@
 #    include <Windows.h>
 #endif // !_MSC_VER
 
+static inline size_t _get_file_size(FILE* file)
+{
+    ::fseek(file, 0L, SEEK_END);
+    size_t file_size = ::ftell(file);
+    if (0 == file_size)
+    {
+        return 0;
+    }
+    ::fseek(file, 0L, SEEK_SET);
+    return file_size;
+}
+
 static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_t filter, int depth, ez::base::file_system::paths_t& paths)
 {
 #ifndef _MSC_VER
@@ -124,6 +136,15 @@ bool ez::base::file_system::rmdir(const std::string& path)
 #endif // _MSC_VER
 }
 
+bool ez::base::file_system::rename(const std::string& from, const std::string& to)
+{
+    if (!file_system::exists(from))
+    {
+        return false;
+    }
+    return 0 == ::rename(from.c_str(), to.c_str());
+}
+
 ez::base::file_system::paths_t ez::base::file_system::walk(const path_t& path, walk_filter_t filter, int depth)
 {
     paths_t paths;
@@ -138,29 +159,30 @@ ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path)
     {
         return bytes_t();
     }
+    SCOPE_PTR_OF(file, ::fclose);
 
-    ::fseek(file, 0L, SEEK_END);
-    size_t file_size = ::ftell(file);
+    size_t file_size = _get_file_size(file);
     if (0 == file_size)
     {
-        ::fclose(file);
         return bytes_t();
     }
 
-    unsigned char* data = (unsigned char*)::malloc(file_size);
-    if (nullptr == data)
+    bytes_t       bytes;
+    unsigned char buffer[256] = {0};
+    while (true)
     {
-        ::fclose(file);
-        return bytes_t();
+        size_t read_size = ::fread(buffer, 1, file_size, file);
+        if (0 == read_size)
+        {
+            break;
+        }
+        bytes.append(buffer, read_size);
+        if (read_size < sizeof(buffer))
+        {
+            break;
+        }
     }
 
-    size_t read_size = ::fread(data, 1, file_size, file);
-
-    bytes_t bytes(data, read_size);
-
-    ::free(data);
-
-    ::fclose(file);
     return bytes;
 }
 
@@ -191,10 +213,42 @@ size_t ez::base::file_system::copy(const path_t& from, const path_t& to)
     {
         return 0;
     }
-    const bytes_t data = load(from);
-    if (data.empty())
+
+    FILE* from_file = ::fopen(from.c_str(), "rb");
+    if (nullptr == from_file)
     {
         return 0;
     }
-    return save(to, data);
+    SCOPE_PTR_OF(from_file, ::fclose);
+
+    size_t from_file_size = _get_file_size(from_file);
+    if (from_file_size == 0)
+    {
+        return 0;
+    }
+
+    FILE* to_file = ::fopen(to.c_str(), "wb");
+    if (nullptr == to_file)
+    {
+        return 0;
+    }
+    SCOPE_PTR_OF(to_file, ::fclose);
+
+    size_t        wrote_size  = 0;
+    unsigned char buffer[256] = {0};
+    while (true)
+    {
+        size_t read_size = ::fread(buffer, 1, sizeof(buffer), from_file);
+        if (read_size == 0)
+        {
+            break;
+        }
+        wrote_size += ::fwrite(buffer, 1, read_size, to_file);
+        if (read_size < sizeof(buffer))
+        {
+            break;
+        }
+    }
+
+    return wrote_size;
 }
