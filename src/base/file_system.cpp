@@ -61,7 +61,7 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
 #else
     WIN32_FIND_DATAA data;
     HANDLE           handle = ::FindFirstFileA(path.join("*"), &data);
-    if (handle == NULL)
+    if (handle == NULL || INVALID_HANDLE_VALUE == handle)
     {
         return -1;
     }
@@ -107,7 +107,7 @@ bool ez::base::file_system::mkdir(const std::string& path)
 #endif // _MSC_VER
 }
 
-bool ez::base::file_system::rmdir(const std::string& path)
+bool ez::base::file_system::remove(const std::string& path)
 {
     if (!file_system::exists(path))
     {
@@ -117,7 +117,7 @@ bool ez::base::file_system::rmdir(const std::string& path)
     const auto files = file_system::walk(path, file_system::file);
     for (const auto& file : files)
     {
-        if (0 != ::rmdir(file.c_str()))
+        if (0 != ::remove(file.c_str()))
         {
             return false;
         }
@@ -125,14 +125,14 @@ bool ez::base::file_system::rmdir(const std::string& path)
     const auto dirs = file_system::walk(path, file_system::directory);
     for (const auto& dir : dirs)
     {
-        if (!file_system::rmdir(dir))
+        if (!file_system::remove(dir))
         {
             return false;
         }
     }
-    return 0 == ::rmdir(path.c_str());
+    return 0 == ::remove(path.c_str());
 #else
-    return 0 == ::rmdir(path.c_str());
+    return 0 == ::remove(path.c_str());
 #endif // _MSC_VER
 }
 

@@ -23,7 +23,7 @@ namespace ez
 
             bool    exists(const std::string& path);
             bool    mkdir(const std::string& path);
-            bool    rmdir(const std::string& path);
+            bool    remove(const std::string& path);
             bool    rename(const std::string& from, const std::string& to);
             paths_t walk(const path_t& path, walk_filter_t filter = walk_filter_t::file, int depth = 0);
             bytes_t load(const path_t& path);
