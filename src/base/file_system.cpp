@@ -17,18 +17,6 @@
 #    include <Windows.h>
 #endif // !_MSC_VER
 
-static inline size_t _get_file_size(FILE* file)
-{
-    ::fseek(file, 0L, SEEK_END);
-    size_t file_size = ::ftell(file);
-    if (0 == file_size)
-    {
-        return 0;
-    }
-    ::fseek(file, 0L, SEEK_SET);
-    return file_size;
-}
-
 static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_t filter, int depth, ez::base::file_system::paths_t& paths)
 {
 #ifndef _MSC_VER
@@ -214,12 +202,6 @@ size_t ez::base::file_system::copy(const path_t& from, const path_t& to)
         return 0;
     }
     SCOPE_PTR_OF(from_file, ::fclose);
-
-    size_t from_file_size = _get_file_size(from_file);
-    if (from_file_size == 0)
-    {
-        return 0;
-    }
 
     FILE* to_file = ::fopen(to.c_str(), "wb");
     if (nullptr == to_file)
