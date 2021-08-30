@@ -168,11 +168,6 @@ ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path)
     return bytes;
 }
 
-size_t ez::base::file_system::save(const path_t& path, const bytes_t& bytes)
-{
-    return save(path, bytes.data(), bytes.length());
-}
-
 size_t ez::base::file_system::save(const ez::base::file_system::path_t& path, const void* src, const size_t& src_size)
 {
     FILE* file = ::fopen(path.c_str(), "wb");
