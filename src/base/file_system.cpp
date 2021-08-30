@@ -161,17 +161,11 @@ ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path)
     }
     SCOPE_PTR_OF(file, ::fclose);
 
-    size_t file_size = _get_file_size(file);
-    if (0 == file_size)
-    {
-        return bytes_t();
-    }
-
     bytes_t       bytes;
     unsigned char buffer[256] = {0};
     while (true)
     {
-        size_t read_size = ::fread(buffer, 1, file_size, file);
+        size_t read_size = ::fread(buffer, 1, sizeof(buffer), file);
         if (0 == read_size)
         {
             break;
