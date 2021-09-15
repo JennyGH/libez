@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-    auto walked = ez::base::file_system::walk("/usr/local", 3);
+    auto walked = ez::base::file_system::walk("/usr/local", ez::base::file_system::all, 3);
 
     for (const auto& path : walked)
     {

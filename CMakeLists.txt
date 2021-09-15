@@ -170,6 +170,8 @@ ENDIF(UNIX)
 # 添加示例代码
 SET(EXAMPLES codec
              os
+             string
+             container
              file_system
 )
 IF(UNIX)

@@ -14,7 +14,6 @@ namespace ez
 {
     namespace base
     {
-
         class thread_pool
         {
         public:
