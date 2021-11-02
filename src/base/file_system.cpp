@@ -102,23 +102,23 @@ bool ez::base::file_system::remove(const std::string& path)
         return false;
     }
 #ifdef _MSC_VER
-    const auto files = file_system::walk(path, file_system::file);
-    for (const auto& file : files)
+    DWORD current_path_attr = ::GetFileAttributesA(path.c_str());
+    if (current_path_attr & _A_SUBDIR)
     {
-        if (0 != ::remove(file.c_str()))
+        const auto entries = file_system::walk(path, file_system::all);
+        for (const auto entry : entries)
         {
-            return false;
+            if (!file_system::remove(entry))
+            {
+                return false;
+            }
         }
+        return ::RemoveDirectoryA(path.c_str());
     }
-    const auto dirs = file_system::walk(path, file_system::directory);
-    for (const auto& dir : dirs)
+    else
     {
-        if (!file_system::remove(dir))
-        {
-            return false;
-        }
+        return ::DeleteFileA(path.c_str());
     }
-    return 0 == ::remove(path.c_str());
 #else
     return 0 == ::remove(path.c_str());
 #endif // _MSC_VER
