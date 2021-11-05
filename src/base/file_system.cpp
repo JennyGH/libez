@@ -35,14 +35,19 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
         {
             continue;
         }
+        const std::string current_path = path.join(dir_info->d_name);
 
-        paths.push_back(path.join(dir_info->d_name));
-        int rv = lstat(paths.back().c_str(), &file_state);
+        int rv = lstat(current_path.c_str(), &file_state);
         if (0 == rv)
         {
+            if (((filter & ez::base::file_system::walk_filter_t::file) != 0 && !S_ISDIR(file_state.st_mode)) ||
+                ((filter & ez::base::file_system::walk_filter_t::directory) != 0 && S_ISDIR(file_state.st_mode)))
+            {
+                paths.push_back(current_path);
+            }
             if (depth > 0 && S_ISDIR(file_state.st_mode))
             {
-                _walk(paths.back(), filter, depth - 1, paths);
+                _walk(current_path, filter, depth - 1, paths);
             }
         }
     }
