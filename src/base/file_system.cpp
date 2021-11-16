@@ -17,7 +17,11 @@
 #    include <Windows.h>
 #endif // !_MSC_VER
 
-static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_t filter, int depth, ez::base::file_system::paths_t& paths)
+static int _walk(
+    const ez::base::path&                path,
+    ez::base::file_system::walk_filter_t filter,
+    int                                  depth,
+    ez::base::file_system::paths_t&      paths)
 {
 #ifndef _MSC_VER
     DIR* dir_ptr = opendir(path);
@@ -53,7 +57,7 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
     }
 #else
     WIN32_FIND_DATAA data;
-    HANDLE           handle = ::FindFirstFileA(path.join("*"), &data);
+    HANDLE           handle = ::FindFirstFileA(path.join("*").to_string().c_str(), &data);
     if (handle == NULL || INVALID_HANDLE_VALUE == handle)
     {
         return -1;
@@ -66,7 +70,8 @@ static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_
         }
         const auto current_path = path.join(data.cFileName);
         if (((filter & ez::base::file_system::walk_filter_t::file) != 0 && (data.dwFileAttributes & _A_SUBDIR) == 0) ||
-            ((filter & ez::base::file_system::walk_filter_t::directory) != 0 && (data.dwFileAttributes & _A_SUBDIR) != 0))
+            ((filter & ez::base::file_system::walk_filter_t::directory) != 0 &&
+             (data.dwFileAttributes & _A_SUBDIR) != 0))
         {
             paths.push_back(current_path);
         }
@@ -94,7 +99,7 @@ bool ez::base::file_system::mkdir(const std::string& path)
     {
         file_system::mkdir(parent_path);
     }
-    return 0 == ::mkdir(native_path);
+    return 0 == ::mkdir(native_path.to_string().c_str());
 #else
     return 0 == ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif // _MSC_VER
