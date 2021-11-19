@@ -37,12 +37,12 @@ namespace ez
             std::string base_name() const;
             std::string dir_name() const;
             std::string suffix() const;
+            bool        has_parent() const;
             path        parent() const;
             path        join(const std::string& sub_path) const;
             std::string to_string(const style_t& type = DEFAULT_PATH_STYLE) const;
             bool        operator==(const path& path) const;
-                        operator std::string() const;
-            bool        has_parent() const;
+            operator std::string() const;
 
         private:
             items_t _items;

@@ -41,21 +41,23 @@ ez::base::path::path(const items_t::const_iterator& begin, const items_t::const_
 {
 }
 
-ez::base::path::path() {}
+ez::base::path::path()
+{
+}
 
 ez::base::path::path(const std::string& str)
-    //: _value(_to_native_path_format(str))
     : _items(_split(str))
 {
 }
 
 ez::base::path::path(const path& that)
-    //: _value(that._value)
     : _items(that._items)
 {
 }
 
-ez::base::path::~path() {}
+ez::base::path::~path()
+{
+}
 
 std::string ez::base::path::root_name() const
 {

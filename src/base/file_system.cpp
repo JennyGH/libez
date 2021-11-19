@@ -24,7 +24,7 @@ static int _walk(
     ez::base::file_system::paths_t&      paths)
 {
 #ifndef _MSC_VER
-    DIR* dir_ptr = opendir(path);
+    DIR* dir_ptr = opendir(path.to_string().c_str());
     if (NULL == dir_ptr)
     {
         return -1;
@@ -130,6 +130,26 @@ bool ez::base::file_system::remove(const std::string& path)
         return ::DeleteFileA(path.c_str());
     }
 #else
+    {
+        const auto entries = file_system::walk(path, file_system::directory);
+        for (const auto entry : entries)
+        {
+            if (!file_system::remove(entry))
+            {
+                return false;
+            }
+        }
+    }
+    {
+        const auto entries = file_system::walk(path, file_system::file);
+        for (const auto entry : entries)
+        {
+            if (0 != ::remove(entry.c_str()))
+            {
+                return false;
+            }
+        }
+    }
     return 0 == ::remove(path.c_str());
 #endif // _MSC_VER
 }

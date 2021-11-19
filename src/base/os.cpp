@@ -96,14 +96,14 @@ std::string ez::base::os::get_error_message(int errcode)
     }
 #    else
     char buffer[1024] = {0};
-#        if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE
-    ::strerror_r(errcode, buffer, sizeof(buffer));
+#        if ANDROID || iOS || ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE)
+    int  ret          = ::strerror_r(errcode, buffer, sizeof(buffer));
     res.assign(buffer);
 #        else
     char* str = ::strerror_r(errcode, buffer, sizeof(buffer));
     res.assign(str);
-#        endif // (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !
-               // _GNU_SOURCE
+#        endif // ANDROID || iOS || ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >=
+               // 600) && !_GNU_SOURCE)
 #    endif     // __WINDOWS__
     return res;
 }
