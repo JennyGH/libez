@@ -23,10 +23,10 @@ int main(int argc, char** argv)
     size_t        serialized_size         = 0;
 
     ez::base::os::serialize(val, ez::base::os::big_endian, serialized);
-    CONSOLE("0x%08x serialized as BIG endian   : 0x%s", val, HEX(serialized));
+    CONSOLE("0x%08x serialized as BIG endian   : 0x%s", val, CHEX(serialized));
 
     ez::base::os::serialize(val, ez::base::os::little_endian, serialized);
-    CONSOLE("0x%08x serialized as LITTLE endian: 0x%s", val, HEX(serialized));
+    CONSOLE("0x%08x serialized as LITTLE endian: 0x%s", val, CHEX(serialized));
 
     return 0;
 }

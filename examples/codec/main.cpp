@@ -11,7 +11,7 @@ static const unsigned char bytes[] = {0x00};
 
 int main(int argc, char** argv)
 {
-    CONSOLE("%s", HEX(bytes));
+    CONSOLE("%s", CHEX(bytes));
     auto encoded = ez::base::codec::base64::encode(bytes);
     CONSOLE("base64 encoded: %s", encoded.c_str());
     auto decoded = ez::base::codec::base64::decode(encoded);

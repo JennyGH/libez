@@ -1,6 +1,6 @@
 #ifndef _BASE_PLATFORM_DEFS_H_
 #define _BASE_PLATFORM_DEFS_H_
-#ifdef defined(_MSC_VER) && (_MSC_VER > 0)
+#if defined(_MSC_VER) && (_MSC_VER > 0)
 #    define __WINDOWS__ 1
 #    define __LINUX__   0
 #else
