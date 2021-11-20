@@ -24,14 +24,17 @@ namespace ez
         {
         public:
             template <typename context_type>
-            using on_accepted_callback_t =
-                void (*)(context_type*, int, std::shared_ptr<struct sockaddr>, const socklen_t&);
+            using on_accepted_callback_t = void (*)(context_type*, int, std::shared_ptr<struct sockaddr>, const socklen_t&);
             template <typename context_type>
             using on_readable_callback_t = void (*)(context_type*, int);
             template <typename context_type>
             using on_writable_callback_t = void (*)(context_type*, int);
             template <typename context_type>
             using on_error_callback_t = void (*)(context_type*, const std::string&);
+
+        private:
+            void accept_all(int fd);
+            void start_worker_loop();
 
         public:
             epoller(int fd);

@@ -7,11 +7,7 @@
 #include <base/format.h>
 #include <base/codec.h>
 
-#if DEBUG
-#    define CONSOLE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
-#else
-#    define CONSOLE(fmt, ...)
-#endif // DEBUG
+#define CONSOLE(fmt, ...) fprintf(stdout, fmt "\n", ##__VA_ARGS__)
 
 #define ERRCODE ez::base::os::get_last_error()
 #define ERRMSG  ez::base::os::get_last_error_message().c_str()
@@ -29,11 +25,7 @@ ez::net::inet::server::server(const inet::endpoint& address)
     rv = ::setsockopt(*_socket, SOL_SOCKET, SO_REUSEADDR, (const void*)&on, sizeof(on));
     if (rv < 0)
     {
-        THROW_NET_EXCEPTION(
-            "Unable to enable reuse address on fd %d, because: %s(%d).",
-            (int)*_socket,
-            ERRMSG,
-            ERRCODE);
+        THROW_NET_EXCEPTION("Unable to enable reuse address on fd %d, because: %s(%d).", (int)*_socket, ERRMSG, ERRCODE);
     }
 
     rv = ::setsockopt(*_socket, SOL_SOCKET, SO_REUSEPORT, (const void*)&on, sizeof(on));
@@ -68,7 +60,7 @@ void ez::net::inet::server::on_writable(const basic_connection&)
 
 void ez::net::inet::server::on_readable(const basic_connection& connection, const std::string& message)
 {
-    // CONSOLE("Received message: %s", message.c_str());
+    CONSOLE("Received message: %s", message.c_str());
     ez::net::send(connection, message.c_str(), message.length(), 0);
 }
 
