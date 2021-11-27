@@ -203,6 +203,9 @@ if(BUILD_TESTS)
     if(benchmark_FOUND)
         list(APPEND tests benchmark_echo_server)
     endif() # endif benchmark_FOUND
+    if(GTest_FOUND)
+        list(APPEND tests unit_test_for_path)
+    endif() # endif GTest_FOUND
     foreach(item ${tests})
         add_subdirectory(tests/${item})
         set_target_properties(${item} PROPERTIES FOLDER "tests")
@@ -224,4 +227,7 @@ install(
     PATTERN "*.hpp"
 )
 
+# 往 CMakePredefinedTargets 中追加一个重新加载工程的指令
+add_custom_target(RELOAD COMMAND ${CMAKE_SOURCE_DIR}/dev.bat SOURCES ${CMAKE_SOURCE_DIR}/dev.bat)
+set_target_properties(RELOAD PROPERTIES FOLDER "CMakePredefinedTargets")
 set_target_properties(${PRJ_TARGET} PROPERTIES FOLDER "CMakePredefinedTargets")

@@ -29,6 +29,11 @@ namespace ez
         public:
             path();
             path(const std::string& str);
+            template <size_t length>
+            path(const char (&str)[length])
+                : path(std::string(str, length - 1))
+            {
+            }
             path(const path& that);
             ~path();
 
@@ -42,7 +47,7 @@ namespace ez
             path        join(const std::string& sub_path) const;
             std::string to_string(const style_t& type = DEFAULT_PATH_STYLE) const;
             bool        operator==(const path& path) const;
-            operator std::string() const;
+                        operator std::string() const;
 
         private:
             items_t _items;
