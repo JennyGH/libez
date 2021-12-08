@@ -17,11 +17,18 @@
 #    include <Windows.h>
 #endif // !_MSC_VER
 
-static int _walk(
-    const ez::base::path&                path,
-    ez::base::file_system::walk_filter_t filter,
-    int                                  depth,
-    ez::base::file_system::paths_t&      paths)
+#define BASE_MIN(a, b) ((a) < (b) ? (a) : (b))
+
+static inline void _default_load_callback(void* context, const uint8_t* bytes, const uint64_t& length)
+{
+    ez::base::file_system::bytes_t* buffer = static_cast<ez::base::file_system::bytes_t*>(context);
+    if (nullptr != buffer && nullptr != bytes && length > 0)
+    {
+        buffer->append(bytes, length);
+    }
+}
+
+static int _walk(const ez::base::path& path, ez::base::file_system::walk_filter_t filter, int depth, ez::base::file_system::paths_t& paths)
 {
 #ifndef _MSC_VER
     DIR* dir_ptr = opendir(path.to_string().c_str());
@@ -70,8 +77,7 @@ static int _walk(
         }
         const auto current_path = path.join(data.cFileName);
         if (((filter & ez::base::file_system::walk_filter_t::file) != 0 && (data.dwFileAttributes & _A_SUBDIR) == 0) ||
-            ((filter & ez::base::file_system::walk_filter_t::directory) != 0 &&
-             (data.dwFileAttributes & _A_SUBDIR) != 0))
+            ((filter & ez::base::file_system::walk_filter_t::directory) != 0 && (data.dwFileAttributes & _A_SUBDIR) != 0))
         {
             paths.push_back(current_path);
         }
@@ -172,45 +178,57 @@ ez::base::file_system::paths_t ez::base::file_system::walk(const path_t& path, w
 
 ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path)
 {
+    return load(path, -1, 0);
+}
+
+ez::base::file_system::bytes_t ez::base::file_system::load(const path_t& path, const uint64_t& length, const uint64_t& offset)
+{
+    bytes_t bytes;
+    load(path, length, offset, _default_load_callback, &bytes);
+    return bytes;
+}
+
+uint64_t ez::base::file_system::load(const path_t& path, const uint64_t& length, const uint64_t& offset, load_callback_t callback, void* context)
+{
     FILE* file = ::fopen(path.c_str(), "rb");
     if (nullptr == file)
     {
-        return bytes_t();
+        return 0;
     }
     SCOPE_PTR_OF(file, ::fclose);
 
-    bytes_t       bytes;
-    unsigned char buffer[256] = {0};
-    while (true)
+    ::fseek(file, offset, SEEK_SET);
+
+    uint64_t total = 0;
+
+    unsigned char buffer[1024] = {0};
+    while (total < length)
     {
-        size_t read_size = ::fread(buffer, 1, sizeof(buffer), file);
+        size_t read_size = ::fread(buffer, 1, BASE_MIN(sizeof(buffer), length - total), file);
         if (0 == read_size)
         {
             break;
         }
-        bytes.append(buffer, read_size);
-        if (read_size < sizeof(buffer))
-        {
-            break;
-        }
+        total += read_size;
+        callback(context, buffer, read_size);
     }
 
-    return bytes;
+    return total;
 }
 
-size_t ez::base::file_system::save(const ez::base::file_system::path_t& path, const void* src, const size_t& src_size)
+uint64_t ez::base::file_system::save(const ez::base::file_system::path_t& path, const void* src, const uint64_t& src_size)
 {
     FILE* file = ::fopen(path.c_str(), "wb");
     if (nullptr == file)
     {
         return 0;
     }
-    size_t output_size = ::fwrite(src, 1, src_size, file);
+    uint64_t output_size = ::fwrite(src, 1, src_size, file);
     ::fclose(file);
     return output_size;
 }
 
-size_t ez::base::file_system::copy(const path_t& from, const path_t& to)
+uint64_t ez::base::file_system::copy(const path_t& from, const path_t& to)
 {
     if (from.empty() || to.empty())
     {
