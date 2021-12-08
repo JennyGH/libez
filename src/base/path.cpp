@@ -29,7 +29,7 @@ static std::list<std::string> _split(const std::string& path)
             begin = i + 1;
         }
     }
-    if (begin < length - 1)
+    if (begin <= length - 1)
     {
         output.push_back(path.substr(begin, length - begin));
     }

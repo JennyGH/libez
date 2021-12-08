@@ -7,13 +7,9 @@
 
 #define ERRCODE           ez::base::os::get_last_error()
 #define ERRMSG            ez::base::os::get_last_error_message().c_str()
-#define CONSOLE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
+#define CONSOLE(fmt, ...) ::fprintf(stdout, fmt "\n", ##__VA_ARGS__)
 
-static void _on_accepted(
-    ez::net::basic_server*           context,
-    int                              socket,
-    std::shared_ptr<struct sockaddr> addr,
-    const socklen_t&                 addr_size)
+static void _on_accepted(ez::net::basic_server* context, int socket, std::shared_ptr<struct sockaddr> addr, const socklen_t& addr_size)
 {
     if (nullptr == context)
     {
@@ -112,8 +108,7 @@ ez::net::basic_server::connection_t ez::net::basic_server::get_connection_by_soc
     return found->second;
 }
 
-ez::net::basic_server& ez::net::basic_server::set_connection_builder(
-    std::shared_ptr<ez::net::basic_connection_builder> builder)
+ez::net::basic_server& ez::net::basic_server::set_connection_builder(std::shared_ptr<ez::net::basic_connection_builder> builder)
 {
     this->_connection_builder = builder;
     return *this;

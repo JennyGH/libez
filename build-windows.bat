@@ -13,12 +13,9 @@ SET BUILD_DIR_NAME=build-windows
 @REM 工程根目录
 SET PROJECT_ROOT=%CD%
 
-@REM 构建工程的目录路径
-SET BUILD_DIR=%PROJECT_ROOT%\%BUILD_DIR_NAME%
-
 @REM 调用编译函数
 CALL:Build Release x86
-@REM CALL:Build Release x64
+CALL:Build Release x64
 
 GOTO:EOF
 
@@ -31,20 +28,22 @@ SET BUILD_TYPE=%1
 @REM 架构位数
 SET ARCHIVE=%2
 
+@REM 构建工程的目录路径
+SET BUILD_DIR=%PROJECT_ROOT%\%BUILD_DIR_NAME%-%ARCHIVE%
+
 @REM 指定编译产物的安装目录
 SET INSTALL_DIR="%PROJECT_ROOT%/built/windows/%ARCHIVE%"
 
-@REM 删除旧的构建目录
-IF EXIST %BUILD_DIR% (
-    RMDIR /s /q %BUILD_DIR%
+@REM 创建构建目录
+IF NOT EXIST %BUILD_DIR% (
+    MKDIR %BUILD_DIR%
 )
-MKDIR %BUILD_DIR%
 CD /D %BUILD_DIR%
 
 IF /i "%ARCHIVE%" EQU "x64" (
     SET ARCHIVE_PARAM=-A x64
 ) ELSE (
-    SET ARCHIVE_PARAM=
+    SET ARCHIVE_PARAM=A -Win32
 )
 
 IF DEFINED VC_TOOL_KIT (
@@ -65,9 +64,6 @@ CALL cmake --build . --config %BUILD_TYPE% --target INSTALL
 
 CD %PROJECT_ROOT%
 
-IF EXIST %BUILD_DIR% (
-    RMDIR /s /q %BUILD_DIR%
-)
 
 GOTO:EOF
 

@@ -19,8 +19,16 @@ IF NOT EXIST %BUILD_DIR% (
 CD /D %BUILD_DIR%
 
 @REM 开始构建工程
-CALL cmake ..                       ^
-           -DCMAKE_BUILD_TYPE=DEBUG ^
-           -DCMAKE_INSTALL_PREFIX=%PROJECT_ROOT%/built/win32 ^
+CALL cmake -DCMAKE_BUILD_TYPE=DEBUG                                               ^
+           -DCMAKE_CXX_CPPCHECK:FILEPATH=OFF                                      ^
+           -DVCPKG_TARGET_TRIPLET=x64-windows-static                              ^
+           -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ^
+           -DCMAKE_INSTALL_PREFIX="%PROJECT_ROOT%\built"                          ^
+           -DBUILD_TESTS=TRUE                                                     ^
+           -DBUILD_EXAMPLES=TRUE                                                  ^
+           -DBUILD_SHARED_LIBS=TRUE                                               ^
+           -DENABLE_STATIC_CXX_RUNTIME=TRUE                                       ^
+           -A x64                                                                 ^
+           ..
 
 ENDLOCAL

@@ -1,224 +1,223 @@
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # 编译工程所需最低CMake版本
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-PROJECT(
-    ez              # 工程名称
-    VERSION 1.0.0   # 工程版本号
-    LANGUAGES C CXX # 工程所用编程语言
-    DESCRIPTION ""  # 工程描述
+project(
+    ez                   # 工程名称
+    VERSION 1.0.0        # 工程版本号
+    LANGUAGES C CXX      # 工程所用编程语言
+    DESCRIPTION "libez." # 工程描述
 )
 
-FIND_PACKAGE(benchmark)
+include(CheckCXXCompilerFlag)
+include(${CMAKE_SOURCE_DIR}/cmake/utils.cmake)
 
-INCLUDE(${CMAKE_SOURCE_DIR}/cmake/utils.cmake)
+find_package(GTest CONFIG)
+find_package(benchmark CONFIG)
 
 # 输出工程相关信息
-MESSAGE(STATUS "PROJECT INFO:")
-MESSAGE(STATUS "    CMAKE_PROJECT_NAME:    ${CMAKE_PROJECT_NAME}")
-MESSAGE(STATUS "    CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
-MESSAGE(STATUS "    CMAKE_SOURCE_DIR:      ${CMAKE_SOURCE_DIR}")
-MESSAGE(STATUS "    CMAKE_PROJECT_VERSION: ${CMAKE_PROJECT_VERSION}")
+message(STATUS "PROJECT INFO:")
+message(STATUS "    CMAKE_PROJECT_NAME:    ${CMAKE_PROJECT_NAME}")
+message(STATUS "    CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "    CMAKE_SOURCE_DIR:      ${CMAKE_SOURCE_DIR}")
+message(STATUS "    CMAKE_PROJECT_VERSION: ${CMAKE_PROJECT_VERSION}")
 
 # 输出系统相关信息
-MESSAGE(STATUS "SYSTEM INFO:")
-MESSAGE(STATUS "    CMAKE_SYSTEM_NAME:              ${CMAKE_SYSTEM_NAME}")
-MESSAGE(STATUS "    CMAKE_SYSTEM_PROCESSOR:         ${CMAKE_SYSTEM_PROCESSOR}")
-MESSAGE(STATUS "    CMAKE_SIZEOF_VOID_P:            ${CMAKE_SIZEOF_VOID_P}")
-MESSAGE(STATUS "    CMAKE_C_COMPILER_ID:            ${CMAKE_C_COMPILER_ID}")
-MESSAGE(STATUS "    CMAKE_EXECUTABLE_SUFFIX:        ${CMAKE_EXECUTABLE_SUFFIX}")
-MESSAGE(STATUS "    CMAKE_SHARED_LIBRARY_PREFIX:    ${CMAKE_SHARED_LIBRARY_PREFIX}")
-MESSAGE(STATUS "    CMAKE_SHARED_LIBRARY_SUFFIX:    ${CMAKE_SHARED_LIBRARY_SUFFIX}")
-MESSAGE(STATUS "    CMAKE_STATIC_LIBRARY_PREFIX:    ${CMAKE_STATIC_LIBRARY_PREFIX}")
-MESSAGE(STATUS "    CMAKE_STATIC_LIBRARY_SUFFIX:    ${CMAKE_STATIC_LIBRARY_SUFFIX}")
-MESSAGE(STATUS "    MSVC:                           ${MSVC}")
-MESSAGE(STATUS "    MINGW:                          ${MINGW}")
-MESSAGE(STATUS "    WIN32:                          ${WIN32}")
-MESSAGE(STATUS "    UNIX:                           ${UNIX}")
-MESSAGE(STATUS "    APPLE:                          ${APPLE}")
-MESSAGE(STATUS "    IOS:                            ${IOS}")
-MESSAGE(STATUS "    ANDROID:                        ${ANDROID}")
-MESSAGE(STATUS "    OHOS:                           ${OHOS}")
-MESSAGE(STATUS "    MSVC_VERSION:                   ${MSVC_VERSION}")
+message(STATUS "SYSTEM INFO:")
+message(STATUS "    CMAKE_SYSTEM_NAME:              ${CMAKE_SYSTEM_NAME}")
+message(STATUS "    CMAKE_SYSTEM_PROCESSOR:         ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "    CMAKE_SIZEOF_VOID_P:            ${CMAKE_SIZEOF_VOID_P}")
+message(STATUS "    CMAKE_C_COMPILER_ID:            ${CMAKE_C_COMPILER_ID}")
+message(STATUS "    CMAKE_EXECUTABLE_SUFFIX:        ${CMAKE_EXECUTABLE_SUFFIX}")
+message(STATUS "    CMAKE_SHARED_LIBRARY_PREFIX:    ${CMAKE_SHARED_LIBRARY_PREFIX}")
+message(STATUS "    CMAKE_SHARED_LIBRARY_SUFFIX:    ${CMAKE_SHARED_LIBRARY_SUFFIX}")
+message(STATUS "    CMAKE_STATIC_LIBRARY_PREFIX:    ${CMAKE_STATIC_LIBRARY_PREFIX}")
+message(STATUS "    CMAKE_STATIC_LIBRARY_SUFFIX:    ${CMAKE_STATIC_LIBRARY_SUFFIX}")
+message(STATUS "    MSVC:                           ${MSVC}")
+message(STATUS "    MINGW:                          ${MINGW}")
+message(STATUS "    WIN32:                          ${WIN32}")
+message(STATUS "    UNIX:                           ${UNIX}")
+message(STATUS "    APPLE:                          ${APPLE}")
+message(STATUS "    IOS:                            ${IOS}")
+message(STATUS "    ANDROID:                        ${ANDROID}")
+message(STATUS "    OHOS:                           ${OHOS}")
+message(STATUS "    MSVC_VERSION:                   ${MSVC_VERSION}")
+
+# 自定义选项
+option(BUILD_TESTS "Build tests." ON)
+option(BUILD_EXAMPLES "Build examples." ON)
+option(BUILD_SHARED_LIBS "Build shared libraries." ON)
+option(ENABLE_STATIC_CXX_RUNTIME "Link C++ static library." ON)
 
 # 检查当前编译器是否64位
-IF(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-    SET(X86_64          TRUE)
-    SET(ARCHIVE_TYPE    x64)
-ELSE()
-    SET(X86_64          FALSE)
-    SET(ARCHIVE_TYPE    x86)
-ENDIF() # ENDIF x64
+if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    set(CMAKE_SYSTEM_ADDRESS_MODE 64)
+    set(x86_64                    TRUE)
+else()
+    set(CMAKE_SYSTEM_ADDRESS_MODE 32)
+    set(x86_64                    FALSE)
+endif() # endif x64
+message(STATUS "    CMAKE_SYSTEM_ADDRESS_MODE:      ${CMAKE_SYSTEM_ADDRESS_MODE}")
+message(STATUS "    x86_64:                         ${x86_64}")
 
 # 设置编译输出目录，带 DEBUG/RELEASE 后缀的为对应编译 Debug/Release 版本时的输出目录
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY           "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG     "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE   "${CMAKE_BINARY_DIR}/bin")
 
-SET(BUILD_TESTS    TRUE CACHE BOOL "Build tests.")
-SET(BUILD_EXAMPLES TRUE CACHE BOOL "Build examples.")
+# 设置静态代码检查命令
+set(CPPCHECK_COMMAND cppcheck -j 4 --quiet --enable=warning,performance,portability --library=std --std=c++11)
+if(MSVC)
+    set(CPPCHECK_COMMAND ${CPPCHECK_COMMAND} --template=vs)
+endif()
 
 # 设置默认安装目录， CMAKE_INSTALL_PREFIX 在 cmake 命令行参数中被指定
-SET(CMAKE_INSTALL_BINDIR        ${CMAKE_INSTALL_PREFIX}/bin)     # 安装运行时文件，例如 .exe, .dll
-SET(CMAKE_INSTALL_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)     # 安装库文件，例如 .lib, .so, .a
-SET(CMAKE_INSTALL_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include) # 安装头文件
+set(CMAKE_INSTALL_BINDIR        bin)     # 安装运行时文件，例如 .exe, .dll
+set(CMAKE_INSTALL_INCLUDEDIR    include) # 安装头文件
+set(CMAKE_INSTALL_LIBDIR        lib64)   # 安装库文件，例如 .lib, .so, .a
+if(NOT EXISTS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} OR NOT x86_64)
+    set(CMAKE_INSTALL_LIBDIR    lib)
+endif() # endif x86_64
 
-# 64位Linux系统需要特别设置
-IF(UNIX AND ${X86_64})
-    SET(CMAKE_INSTALL_LIBDIR    ${CMAKE_INSTALL_PREFIX}/lib64)   # 安装库文件，例如 .lib, .so, .a
-ENDIF() # ENDIF UNIX && X86_64
+# 用于判断平台类型的宏定义
+add_compile_definitions("$<$<BOOL:${MSVC}>:MSVC>")
+add_compile_definitions("$<$<BOOL:${MINGW}>:MINGW>")
+add_compile_definitions("$<$<BOOL:${UNIX}>:UNIX>")
+add_compile_definitions("$<$<BOOL:${WIN32}>:WIN32>")
+add_compile_definitions("$<$<BOOL:${APPLE}>:OSX>")
+add_compile_definitions("$<$<BOOL:${APPLE}>:APPLE>")
+add_compile_definitions("$<$<BOOL:${IOS}>:iOS>")
+add_compile_definitions("$<$<BOOL:${OHOS}>:OHOS>")
+add_compile_definitions("$<$<BOOL:${ANDROID}>:ANDROID>")
 
-# 设置在 MSVC 中编译时使用 /MT 与 /MTd 模式，注释后使用 /MD 与 /MDd 模式
-# SET(CMAKE_MSVC_RUNTIME_LIBRARY  "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# 用于区分 DEBUG/RELEASE 的宏定义
+add_compile_definitions("$<$<CONFIG:Debug>:DEBUG=1>")
+add_compile_definitions("$<$<CONFIG:Debug>:_DEBUG=1>")
 
-# 添加一些用于判断平台类型的宏定义
-IF(MSVC)
-    ADD_DEFINITIONS(-DMSVC=1)
-ENDIF()
-IF(MINGW)
-    ADD_DEFINITIONS(-DMINGW=1)
-ENDIF()
-IF(WIN32)
-    ADD_DEFINITIONS(-DWIN32=1)
-    ADD_DEFINITIONS(-D_WIN32=1)
-    ADD_DEFINITIONS(-DWINDOWS=1)
-    ADD_DEFINITIONS(-D_WINDOWS=1)
-ENDIF()
-IF(UNIX)
-    ADD_DEFINITIONS(-DUNIX=1)
-ENDIF()
-IF(APPLE)
-    ADD_DEFINITIONS(-DOSX=1)
-    ADD_DEFINITIONS(-DAPPLE=1)
-ENDIF()
-IF(IOS)
-    ADD_DEFINITIONS(-DIOS=1)
-ENDIF()
-IF(ANDROID)
-    ADD_DEFINITIONS(-DANDROID=1)
-ENDIF()
-IF(OHOS)
-    ADD_DEFINITIONS(-DOHOS=1)
-ENDIF()
+# 用于区分 32/64 位的宏定义
+add_compile_definitions("$<$<BOOL:${x86_64}>:X64>")
+add_compile_definitions("$<$<BOOL:${x86_64}>:X86_64>")
+
+# 针对 MSVC 特有的宏定义
+add_compile_definitions("$<$<BOOL:${MSVC}>:WINVER=0x0501>")
+add_compile_definitions("$<$<BOOL:${MSVC}>:_MSC_VER=${MSVC_VERSION}>")
+add_compile_definitions("$<$<BOOL:${MSVC}>:_WIN32_WINNT=0x0501>")
+
+# 检查是否支持C++11
+if(MSVC)
+    set(COMPILER_SUPPORTS_CXX11 $<VERSION_GREATER:${MSVC_VERSION},1600>)
+else()
+    check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+endif() # endif MSVC
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    add_definitions(-DENABLE_CXX11)
+endif() # endif COMPILER_SUPPORTS_CXX11
 
 # 设置编译时选项.
-IF(MSVC)
-    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS}   /MP /utf-8")
-    SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} /MP /utf-8")
-ELSE()
-    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS}   -fPIC -std=c11   -Wfatal-errors -Wextra")
-    SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -Wfatal-errors -Wextra -fexceptions -frtti")
-    SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -ggdb")
-    SET(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -s")
-ENDIF() # ENDIF MSVC
+if(MSVC)
+    check_cxx_compiler_flag("/MP"    COMPILER_SUPPORTS_FLAG_MP)
+    check_cxx_compiler_flag("/EHa"   COMPILER_SUPPORTS_FLAG_EHA)
+    check_cxx_compiler_flag("/utf-8" COMPILER_SUPPORTS_FLAG_UTF8)
+    add_compile_options(
+        "$<$<BOOL:${COMPILER_SUPPORTS_FLAG_MP}>:/MP>"
+        "$<$<BOOL:${COMPILER_SUPPORTS_FLAG_EHA}>:/EHa>"
+        "$<$<BOOL:${COMPILER_SUPPORTS_FLAG_UTF8}>:/utf-8>"
+    )
+    if(ENABLE_STATIC_CXX_RUNTIME)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>") # 设置在 MSVC 中编译时使用 /MT 与 /MTd 模式，注释后使用 /MD 与 /MDd 模式
+    endif() # endif ENABLE_STATIC_CXX_RUNTIME
+else()
+    check_cxx_compiler_flag("-s"              COMPILER_SUPPORTS_FLAG_STRIP)
+    check_cxx_compiler_flag("-frtti"          COMPILER_SUPPORTS_FLAG_RTTI)
+    check_cxx_compiler_flag("-frtti"          COMPILER_SUPPORTS_FLAG_RTTI)
+    check_cxx_compiler_flag("-static-libgcc"  COMPILER_SUPPORTS_FLAG_STATIC_LIBGCC)
+    add_compile_options(
+        -fPIC
+        -Wno-unused-but-set-variable
+        -Wfatal-errors
+        -Wextra
+        "$<$<BOOL:${ENABLE_STATIC_CXX_RUNTIME}>:-static-libstdc++>"
+        "$<$<AND:$<BOOL:${ENABLE_STATIC_CXX_RUNTIME}>,$<BOOL:${COMPILER_SUPPORTS_FLAG_STATIC_LIBGCC}>>:-static-libgcc>"
+        "$<$<BOOL:${COMPILER_SUPPORTS_FLAG_RTTI}>:-frtti>"
+        "$<$<BOOL:${COMPILER_SUPPORTS_FLAG_EXCEPTIONS}>:-fexceptions>"
+        "$<$<CONFIG:Debug>:-g>"
+        "$<$<CONFIG:Debug>:-O0>"
+        "$<$<CONFIG:Debug>:-Wall>"
+        "$<$<CONFIG:Debug>:-ggdb>"
+        "$<$<AND:$<CONFIG:Release>,${COMPILER_SUPPORTS_FLAG_STRIP}>:-s>"
+    )
+endif() # endif MSVC
 
 # 添加一些通自定义的宏定义
-ADD_DEFINITIONS(
+add_definitions(
     -DUNICODE  # 设置工程使用 UNICODE 字符集
     -D_UNICODE # 设置工程使用 UNICODE 字符集
-    -DWIN32_LEAN_AND_MEAN
     -DPROJECT_ROOT_PATH="${CMAKE_SOURCE_DIR}" # 用于获取当前工程根目录的宏
 )
 
-# 增加对DEBUG模式的判定宏
-IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    ADD_DEFINITIONS(
-        -DDEBUG=1
-        -D_DEBUG=1
-    )
-ENDIF() # ENDIF DEBUG
-
-# 如果当前编译器是64位，添加用于标识64位的宏定义
-IF(${X86_64})
-    ADD_DEFINITIONS(
-        -DX64=1
-        -DX86_64=1
-    )
-ENDIF() # ENDIF X86_64
-
-# 使用 MSVC 编译时，添加 Windows 相关的宏定义:
-IF(MSVC)
-    ADD_DEFINITIONS(
-        -D_MSC_VER=${MSVC_VERSION}
-        -DWINVER=0x0600
-        -D_WIN32_WINNT=0x0600
-    )
-ENDIF() # ENDIF MSVC
-
 # 整个工程需要包含的库目录.
-INCLUDE_DIRECTORIES(
-    ${NETCA_CRYPTO_DEV_PATH}/include
-    ${NETCA_CRYPTO_DEV_PATH}/include/other
+include_directories(
 )
 
 # 整个工程寻找链接库的目录.
-LINK_DIRECTORIES(
+link_directories(
 )
 
 # 添加项目目录.
-ADD_SUBDIRECTORY(src/base)
-IF(UNIX)
-    ADD_SUBDIRECTORY(src/net)
-ENDIF(UNIX)
-# 添加示例代码
-SET(EXAMPLES codec
-             os
-             string
-             container
-             file_system
-)
-IF(UNIX)
-    SET(EXAMPLES ${EXAMPLES} echo_server)
-ENDIF(UNIX)
-IF(${BUILD_EXAMPLES})
-    FOREACH(EXAMPLE ${EXAMPLES})
-        ADD_SUBDIRECTORY(examples/${EXAMPLE})
-        SET_TARGET_PROPERTIES(${EXAMPLE} PROPERTIES FOLDER "examples")
-        INSTALL(
-            TARGETS ${EXAMPLE}
+add_subdirectory(src/base)
+if(UNIX)
+    add_subdirectory(src/net)
+endif(UNIX)
+
+if(BUILD_EXAMPLES)
+    # 添加示例代码
+    list(APPEND examples codec)
+    list(APPEND examples os)
+    list(APPEND examples string)
+    list(APPEND examples container)
+    list(APPEND examples file_system)
+    if(UNIX)
+        list(APPEND examples echo_server)
+    endif(UNIX)
+    foreach(item ${examples})
+        add_subdirectory(examples/${item})
+        set_target_properties(${item} PROPERTIES FOLDER "examples")
+        install(
+            TARGETS ${item}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         )
-    ENDFOREACH()
-ENDIF()
-# 添加测试例程
-SET(TESTS )
-IF(benchmark_FOUND)
-    SET(TESTS ${TESTS} benchmark_echo_server)
-ENDIF() # ENDIF benchmark_FOUND
-IF(${BUILD_TESTS})
-    FOREACH(TEST ${TESTS})
-        ADD_SUBDIRECTORY(tests/${TEST})
-        SET_TARGET_PROPERTIES(${TEST} PROPERTIES FOLDER "tests")
-        INSTALL(
-            TARGETS ${TEST}
+    endforeach()
+endif()
+
+if(BUILD_TESTS)
+    # 添加测试例程
+    if(benchmark_FOUND)
+        list(APPEND tests benchmark_echo_server)
+    endif() # endif benchmark_FOUND
+    if(GTest_FOUND)
+        list(APPEND tests unit_test_for_path)
+    endif() # endif GTest_FOUND
+    foreach(item ${tests})
+        add_subdirectory(tests/${item})
+        set_target_properties(${item} PROPERTIES FOLDER "tests")
+        install(
+            TARGETS ${item}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         )
-    ENDFOREACH()
-ENDIF()
+    endforeach()
+endif()
 
 # 添加安装命令.
-INSTALL(
-    TARGETS ezbase
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-IF(UNIX)
-    INSTALL(
-        TARGETS eznet
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-ENDIF(UNIX)
-INSTALL(
+install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/src/"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING
@@ -228,4 +227,7 @@ INSTALL(
     PATTERN "*.hpp"
 )
 
-SET_TARGET_PROPERTIES(${PRJ_TARGET} PROPERTIES FOLDER "CMakePredefinedTargets")
+# 往 CMakePredefinedTargets 中追加一个重新加载工程的指令
+add_custom_target(RELOAD COMMAND ${CMAKE_SOURCE_DIR}/dev.bat SOURCES ${CMAKE_SOURCE_DIR}/dev.bat)
+set_target_properties(RELOAD PROPERTIES FOLDER "CMakePredefinedTargets")
+set_target_properties(${PRJ_TARGET} PROPERTIES FOLDER "CMakePredefinedTargets")

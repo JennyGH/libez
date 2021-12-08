@@ -77,9 +77,41 @@ static size_t _test_tcp_transfer(const sockaddr_in& addr, const void* data, cons
     return rv;
 }
 
+static void test_tcp_connect(benchmark::State& state)
+{
+    static const std::string    ip     = "127.0.0.1";
+    static const unsigned short port   = 8080;
+    static const std::string    buffer = "ping"; //_generate_send_buffer(32 * 1024);
+    int64_t                     items  = 0;
+
+    // Initialize client address.
+    sockaddr_in addr;
+    _initialize_sockaddr(ip, port, addr);
+
+    for (auto _ : state)
+    {
+        // Connect to server.
+        scope_socket skt = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (INVALID_SOCKET == skt)
+        {
+            CONSOLE("Unable to create socket, because: %s", ERRMSG);
+            exit(-1);
+        }
+
+        int rv = ::connect(skt, (const sockaddr*)&addr, sizeof(sockaddr_in));
+        if (SOCKET_ERROR == rv)
+        {
+            CONSOLE("Unable to connect remote server.");
+            exit(-1);
+        }
+        items++;
+    }
+    state.SetItemsProcessed(items);
+}
+
 static void test_tcp_transfer(benchmark::State& state)
 {
-    static const std::string    ip          = "192.168.201.184";
+    static const std::string    ip          = "127.0.0.1";
     static const unsigned short port        = 8080;
     static const std::string    buffer      = "ping"; //_generate_send_buffer(32 * 1024);
     int64_t                     output_size = 0;
@@ -118,6 +150,8 @@ static void test_tcp_transfer(benchmark::State& state)
     state.SetItemsProcessed(items);
     state.SetBytesProcessed(state.iterations() * output_size);
 }
+
+BENCHMARK(test_tcp_connect)->Unit(benchmark::kMillisecond)->Threads(THREAD_COUNT)->UseRealTime();
 BENCHMARK(test_tcp_transfer)->Unit(benchmark::kMillisecond)->Threads(THREAD_COUNT)->UseRealTime();
 
 BENCHMARK_MAIN();
