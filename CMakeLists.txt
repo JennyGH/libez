@@ -205,6 +205,7 @@ if(BUILD_TESTS)
     endif() # endif benchmark_FOUND
     if(GTest_FOUND)
         list(APPEND tests unit_test_for_path)
+        list(APPEND tests unit_test_for_string)
     endif() # endif GTest_FOUND
     foreach(item ${tests})
         add_subdirectory(tests/${item})

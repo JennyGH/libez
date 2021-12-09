@@ -25,9 +25,7 @@ namespace ez
                 : string_t(src, len) {};
             basic_string(const unsigned char src[], typename string_t::size_type len)
                 : string_t(src, src + len) {};
-            basic_string(
-                const std::istreambuf_iterator<character_type>& begin,
-                const std::istreambuf_iterator<character_type>& end)
+            basic_string(const std::istreambuf_iterator<character_type>& begin, const std::istreambuf_iterator<character_type>& end)
                 : string_t(begin, end) {};
             ~basic_string() {};
 
@@ -125,23 +123,17 @@ namespace ez
 
             basic_string& replace(const basic_string& from, const basic_string& to)
             {
-                basic_string&                me        = *this;
-                typename string_t::size_type total     = 0;
-                splited_t                    split_res = split(from);
-                for (typename splited_t::const_iterator iter = split_res.begin(); iter != split_res.end(); ++iter)
+                std::size_t pos = string_t::npos;
+                while (string_t::npos != (pos = this->find(from)))
                 {
-                    total += iter->length();
-                }
-                total += ((split_res.size() - 1) * to.length());
-                this->clear();
-                this->reserve(total + 1);
-                for (typename splited_t::const_iterator iter = split_res.begin(); iter != split_res.end(); ++iter)
-                {
-                    if (iter != split_res.begin())
+                    if (0 == pos)
                     {
-                        me += to;
+                        *this = to + this->substr(from.length());
                     }
-                    me += *iter;
+                    else
+                    {
+                        *this = this->substr(0, pos) + to + this->substr(pos + from.length());
+                    }
                 }
                 return *this;
             }
